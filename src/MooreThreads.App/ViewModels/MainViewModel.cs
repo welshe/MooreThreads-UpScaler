@@ -130,7 +130,7 @@ namespace MooreThreadsUpScaler.ViewModels
         {
             _windowManager     = App.Services.GetRequiredService<WindowManager>();
             _profileManager    = App.Services.GetRequiredService<ProfileManager>();
-            _optiScalerManager = new OptiScalerManager();
+            _optiScalerManager = App.Services.GetRequiredService<OptiScalerManager>();
 
             Gpu = GpuDetector.Detect();
 
@@ -484,7 +484,11 @@ namespace MooreThreadsUpScaler.ViewModels
                 var module = procs[0].MainModule;
                 return module is not null ? Path.GetDirectoryName(module.FileName) : null;
             }
-            catch { return null; }
+            catch (Exception ex) 
+            { 
+                System.Diagnostics.Debug.WriteLine($"[OptiScalerManager] GetProcessDirectory failed: {ex.Message}");
+                return null; 
+            }
         }
 
         private async Task<bool> DownloadOptiScalerAsync()
@@ -513,8 +517,9 @@ namespace MooreThreadsUpScaler.ViewModels
                 File.Delete(zipPath);
                 return File.Exists(Path.Combine(_storageDir, DllName));
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"[OptiScalerManager] DownloadOptiScalerAsync failed: {ex.Message}");
                 return false;
             }
         }

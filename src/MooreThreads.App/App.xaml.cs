@@ -2,6 +2,7 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using MooreThreadsUpScaler.Core.Profiles;
 using MooreThreadsUpScaler.Core.Windowing;
+using MooreThreadsUpScaler.ViewModels;
 
 namespace MooreThreadsUpScaler
 {
@@ -16,6 +17,7 @@ namespace MooreThreadsUpScaler
             var services = new ServiceCollection();
             services.AddSingleton<WindowManager>();
             services.AddSingleton<ProfileManager>();
+            services.AddSingleton<OptiScalerManager>();
             Services = services.BuildServiceProvider();
         }
 

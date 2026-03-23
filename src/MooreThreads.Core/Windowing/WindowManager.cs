@@ -103,7 +103,11 @@ namespace MooreThreadsUpScaler.Core.Windowing
                         IsBorderless = IsFullscreen(rect)
                     });
                 }
-                catch { /* skip inaccessible windows */ }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[WindowManager] Failed to enumerate window: {ex.Message}");
+                    /* skip inaccessible windows */
+                }
                 return true;
             }, IntPtr.Zero);
 
@@ -136,7 +140,11 @@ namespace MooreThreadsUpScaler.Core.Windowing
                 bmpSrc.Freeze();
                 return bmpSrc;
             }
-            catch { return null; }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[WindowManager] CaptureWindow failed: {ex.Message}");
+                return null;
+            }
         }
 
         public WindowInfo? GetForegroundWindowInfo()
@@ -164,7 +172,11 @@ namespace MooreThreadsUpScaler.Core.Windowing
                     IsBorderless = IsFullscreen(rect)
                 };
             }
-            catch { return null; }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[WindowManager] GetForegroundWindowInfo failed: {ex.Message}");
+                return null;
+            }
         }
 
         private static bool IsToolWindow(IntPtr hWnd)

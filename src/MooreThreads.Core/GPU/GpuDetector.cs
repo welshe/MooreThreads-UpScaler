@@ -38,6 +38,7 @@ namespace MooreThreadsUpScaler.Core.GPU
         {
             GpuVendor.Nvidia       => new[] { "NIS",  "LS1", "FSR" },
             GpuVendor.AMD          => new[] { "FSR",  "LS1", "NIS" },
+            GpuVendor.Intel        => IsDiscrete ? new[] { "XeSS", "LS1", "FSR" } : new[] { "LS1", "Integer" },
             GpuVendor.MooreThreads => new[] { "MTSR", "LS1", "FSR" },
             _                      => new[] { "LS1",  "Integer"     }
         };
@@ -75,24 +76,24 @@ namespace MooreThreadsUpScaler.Core.GPU
                         Vendor             = vendor,
                         DedicatedVramBytes = vram,
                         DriverVersion      = driverVersion,
-                        IsDiscrete         = IsDiscreteGpu(vendor)
+                        IsDiscrete         = IsDiscreteGpu(vendor, name)
                     });
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"[GpuDetector] WMI detection failed: {ex.Message}");
                 return new GpuInfo { Name = "GPU (Unknown)", Vendor = GpuVendor.Unknown };
             }
 
             if (candidates.Count == 0)
                 return new GpuInfo { Name = "GPU (Unknown)", Vendor = GpuVendor.Unknown };
 
-            // Priority: MooreThreads → discrete NVIDIA/AMD → first found
+            // Priority: MooreThreads → discrete NVIDIA/AMD/Intel Arc → first found
             var mt = candidates.Find(g => g.Vendor == GpuVendor.MooreThreads);
             if (mt != null) return mt;
 
-            var discrete = candidates.Find(g => g.IsDiscrete &&
-                (g.Vendor == GpuVendor.Nvidia || g.Vendor == GpuVendor.AMD));
+            var discrete = candidates.Find(g => g.IsDiscrete);
             return discrete ?? candidates[0];
         }
 
@@ -149,9 +150,10 @@ namespace MooreThreadsUpScaler.Core.GPU
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 // Registry access denied or key missing — caller will fall back to AdapterRAM
+                System.Diagnostics.Debug.WriteLine($"[GpuDetector] Registry VRAM read failed: {ex.Message}");
             }
 
             return 0;
@@ -178,7 +180,18 @@ namespace MooreThreadsUpScaler.Core.GPU
             return GpuVendor.Unknown;
         }
 
-        private static bool IsDiscreteGpu(GpuVendor vendor)
-            => vendor is GpuVendor.Nvidia or GpuVendor.AMD or GpuVendor.MooreThreads;
+        private static bool IsDiscreteGpu(GpuVendor vendor, string name)
+        {
+            if (vendor is GpuVendor.Nvidia or GpuVendor.AMD or GpuVendor.MooreThreads)
+                return true;
+            // Intel Arc GPUs are discrete, integrated Intel graphics are not
+            if (vendor == GpuVendor.Intel)
+            {
+                var n = name.ToLowerInvariant();
+                return n.Contains("arc") || n.Contains("a-series") || n.Contains("a7") || 
+                       n.Contains("a5") || n.Contains("a3") || n.Contains("battlemage");
+            }
+            return false;
+        }
     }
 }

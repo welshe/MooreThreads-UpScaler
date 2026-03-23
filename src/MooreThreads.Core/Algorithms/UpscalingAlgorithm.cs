@@ -182,14 +182,18 @@ namespace MooreThreadsUpScaler.Core.Algorithms
 
     // ─────────────────────────────────────────────────────────────
     //  NIS — NVIDIA Image Scaling inspired
+    //  NOTE: This is a placeholder that uses FSR RCAS sharpening as fallback.
+    //  A proper NIS implementation would use a 6-tap filter with directional
+    //  interpolation and a trained convolutional neural network for upscaling.
     // ─────────────────────────────────────────────────────────────
     public class NISAlgorithm : IUpscalingAlgorithm
     {
         public string Name => "NIS";
-        public string Description => "NVIDIA optimised — very fast";
+        public string Description => "NVIDIA optimised — placeholder using FSR RCAS";
         public PerformanceLevel Performance => PerformanceLevel.VeryLow;
         public bool SupportsSharpness => true;
 
+        // Uses FSR RCAS as fallback - proper NIS implementation pending
         private readonly FSRAlgorithm _rcas = new();
 
         public BitmapSource Scale(BitmapSource source, int targetWidth, int targetHeight, double sharpness = 1.0)
