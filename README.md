@@ -39,3 +39,5 @@ Press **Insert** in-game to toggle the OptiScaler overlay.
 - Frame generation works best with a base FPS of 30-60
 - Not recommended for online multiplayer games (may trigger anti-cheat)
 - GPU must support the selected upscaler (DLSS requires NVIDIA, XeSS works best on Intel ARC)
+
+<img width="735" height="530" alt="image" src="https://github.com/user-attachments/assets/74051a8f-b4b2-4740-b1c1-e2ded73e81dd" />
